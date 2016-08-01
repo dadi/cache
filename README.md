@@ -4,6 +4,7 @@
 
 ## Overview
 
+Removing the complexity involved in setting up two separate cache handlers for every project, DADI Cache can use either the filesystem or a Redis instance to store and retrieve content.
 
 ## Install
 
@@ -13,10 +14,52 @@ npm install @dadi/cache --save
 
 ## Usage
 
+### Configuraton options
+
+#### File caching
+
+Property|Description|Default|Example
+--------|-----------|-------|-------
+enabled|If true, caching is enabled using the following settings|true|
+path|The absolute or relative path to the directory for cache files|"./cache"|"/tmp/dadi-cache/"
+
+#### Redis caching
+
+A set of options for both file and Redis caching must be provided if you intend to use Redis as the cache store. This allows DADI Cache
+to [fallback to file caching](#fallback) in the event of a Redis connection failure.
+
+Property|Description|Default|Example
+--------|-----------|-------|-------
+enabled|If true, caching is enabled using the following settings|false|true
+host|The hostname or IP address of the Redis server |"127.0.0.1"|"drum.redistogo.com"
+port|The port of the Redis server|6379 |9092
+
+#### Default options
+
+A DADI Cache instance can be created with no options, in which case the following options will be used:
+
+```js
+{
+  "directory": {
+    "enabled": true,
+    "path": "./cache"
+  },
+  "redis": {
+    "enabled": false
+  }
+}
+```
+
+### Fallback
+
+In the case of a Redis connection failure, DADI Cache will attempt to reconnect four times before switching to file caching.
+After a configurable period (default 5 minutes), an attempt will be made to reconnect to Redis and if successful DADI Cache will resume
+using Redis as the cache store.
+
+
 ### Create Cache instance
 
 ```js
-{@lang javascript}
 // require the module
 var Cache = require('@dadi/cache')
 
@@ -47,7 +90,6 @@ Returns a Promise that returns an empty String if successful, otherwise an Error
 The `data` argument can be a String, Buffer or Stream.
 
 ```js
-{@lang javascript}
 var key = 'test-cached-item'
 var data = 'test data'
 
@@ -66,7 +108,6 @@ Returns a Promise that returns a Stream of the cached data if the key exists or 
 The error message returned is "The specified key does not exist".
 
 ```js
-{@lang javascript}
 var key = 'test-cached-item'
 
 cache.get(key).then((stream) => {
@@ -79,7 +120,6 @@ cache.get(key).then((stream) => {
 ### Example usage
 
 ```js
-{@lang javascript}
 var Cache = require('@dadi/cache')
 var cache = new Cache()
 
@@ -92,8 +132,18 @@ app.use(function (req, res, next) {
     // cached data not found for req.url
     var content = fetchContent()
 
-    res.setHeader('X-Cache', 'MISS')
-    res.end(content)
+    // cache the content
+    cache.set(req.url, content).then(() => {
+      res.setHeader('X-Cache', 'MISS')
+      res.end(content)
+    })
   })
 })
 ```
+
+### Roadmap
+
+* Switch to [ioredis](https://github.com/luin/ioredis) package for Redis
+* Add LATENCY HISTORY to assist in determining Redis performance
+* Add FLUSH
+* Add authentication options for Redis

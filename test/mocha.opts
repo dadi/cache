@@ -1,0 +1,4 @@
+--growl
+--ui bdd
+--recursive
+--require=env-test

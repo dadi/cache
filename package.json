@@ -1,0 +1,36 @@
+{
+  "name": "@dadi/cache",
+  "version": "0.0.1-Beta",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "docs": "jsdoc -c ./docs/docconf.json -t ./node_modules/ink-docstrap/template -R README.md -r lib -d docs",
+    "test": "standard lib && env NODE_ENV=test ./node_modules/.bin/istanbul cover --report cobertura --report text --report html --report lcov ./node_modules/.bin/_mocha test",
+    "posttest": "./scripts/coverage.js"
+  },
+  "author": "DADI <team@dadi.tech>",
+  "license": "ISC",
+  "dependencies": {
+    "@dadi/logger": "^1.1.1",
+    "dbc": "^3.0.0",
+    "ioredis": "^2.2.0",
+    "mkdirp": "^0.5.1",
+    "redis": "^2.6.2",
+    "redis-rstream": "^0.1.2",
+    "redis-wstream": "^0.2.5",
+    "standard": "^7.1.2",
+    "streamifier": "^0.1.1",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "env-test": "^1.0.0",
+    "ink-docstrap": "latest",
+    "ioredis-mock": "^1.6.0",
+    "istanbul": "^0.4.4",
+    "istanbul-cobertura-badger": "^1.2.1",
+    "mocha": "^2.5.3",
+    "should": "^10.0.0",
+    "sinon": "^1.17.5",
+    "supertest": "^2.0.0"
+  }
+}

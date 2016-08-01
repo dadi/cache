@@ -1,0 +1,28 @@
+{
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc","closure"]
+  },
+  "source": {
+    "includePattern": ".+\\.js(doc)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "systemName"            : "DADI Cache",
+    "footer"                : "",
+    "copyright"             : "",
+    "includeDate"           : true,
+    "navType"               : "vertical",
+    "theme"                 : "yeti",
+    "linenums"              : true,
+    "collapseSymbols"       : true,
+    "inverseNav"            : true,
+    "outputSourceFiles"     : true,
+    "outputSourcePath"      : false,
+    "syntaxTheme"           : "default",
+    "sort"                  : true
+  }
+}

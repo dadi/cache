@@ -19,16 +19,19 @@
     "redis-rstream": "^0.1.2",
     "redis-wstream": "^0.2.5",
     "standard": "^7.1.2",
+    "stream-to-string": "^1.1.0",
     "streamifier": "^0.1.1",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
     "env-test": "^1.0.0",
+    "fakeredis": "^1.0.3",
     "ink-docstrap": "latest",
     "ioredis-mock": "^1.6.0",
     "istanbul": "^0.4.4",
     "istanbul-cobertura-badger": "^1.2.1",
     "mocha": "^2.5.3",
+    "mock-redis-client": "^0.91.13",
     "should": "^10.0.0",
     "sinon": "^1.17.5",
     "supertest": "^2.0.0"

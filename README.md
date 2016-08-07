@@ -22,6 +22,8 @@ Property|Description|Default|Example
 --------|-----------|-------|-------
 enabled|If true, caching is enabled using the following settings|true|
 path|The absolute or relative path to the directory for cache files|"./cache"|"/tmp/dadi-cache/"
+extension| (optional) The extension to use for cache files| none | "json"
+directoryChunkSize| (optional) If set, cache files are stored in a series of subdirectories based on the cache key| 0 | 5
 
 #### Redis caching
 

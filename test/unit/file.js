@@ -74,11 +74,16 @@ describe('FileCache', function () {
   describe('get', function () {
     var cache = new Cache({ directory: { enabled: true, path: './cache', extension: 'json' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
 
-    afterEach(function () {
-      var files = fs.readdirSync(cache.cacheHandler.directory)
-      files.forEach((file) => {
-        fs.unlinkSync(cache.cacheHandler.directory + '/' + file)
-      })
+    after(function () {
+      // remove cache folder contents completely, and recreate
+      var cleanup = function (dir) {
+        var exec = require('child_process').exec
+        exec('rm -r ' + dir, function (err, stdout, stderr) {
+          exec('mkdir ' + dir)
+        })
+      }
+
+      cleanup(path.resolve(cache.cacheHandler.directory))
     })
 
     it('should generate a cache filename from the directory and key', sinon.test(function() {
@@ -88,6 +93,32 @@ describe('FileCache', function () {
       cache.get('key1')
 
       return spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
+    }))
+
+    it('should generate a cache path with subdirectories when directoryChunkSize is set', sinon.test(function() {
+      var cacheWithChunks = new Cache({ directory: { enabled: true, path: './cache', extension: 'json', directoryChunkSize: 4 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+      var spy = this.spy(fs, 'stat')
+
+      var key = '1073ab6cda4b991cd29f9e83a307f34004ae9327'
+      var expectedPath = path.resolve(cacheWithChunks.cacheHandler.directory + '/1073/ab6c/da4b/991c/d29f/9e83/a307/f340/04ae/9327' + '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json')
+
+      cacheWithChunks.set(key, 'data')
+
+      cacheWithChunks.get(key)
+      return spy.firstCall.args[0].should.eql(expectedPath)
+    }))
+
+    it('should generate a cache path with uneven-length subdirectories when directoryChunkSize is set', sinon.test(function() {
+      var cacheWithChunks = new Cache({ directory: { enabled: true, path: './cache', extension: 'json', directoryChunkSize: 7 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+      var spy = this.spy(fs, 'stat')
+
+      var key = '1073ab6cda4b991cd29f9e83a307f34004ae9327'
+      var expectedPath = path.resolve(cacheWithChunks.cacheHandler.directory + '/1073ab6/cda4b99/1cd29f9/e83a307/f34004a/e9327' + '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json')
+
+      cacheWithChunks.set(key, 'data')
+
+      cacheWithChunks.get(key)
+      return spy.firstCall.args[0].should.eql(expectedPath)
     }))
 
     it('should reject if the key cannot be found', function(done) {

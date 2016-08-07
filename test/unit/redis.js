@@ -1,3 +1,4 @@
+var EventEmitter = require('events').EventEmitter
 var fakeredis = require('fakeredis')
 var fs = require('fs')
 var path = require('path')
@@ -15,15 +16,22 @@ var RedisCache = require(__dirname + '/../../lib/redis')
 var cache
 
 describe('RedisCache', function () {
-
   describe('set', function () {
 
-    afterEach(function () {
-      if (cache.cacheHandler.directory) {
-        var files = fs.readdirSync(cache.cacheHandler.directory)
-        files.forEach((file) => {
-          fs.unlinkSync(cache.cacheHandler.directory + '/' + file)
+    after(function (done) {
+      // remove cache folder contents completely, and recreate
+      var cleanup = function (dir) {
+        var exec = require('child_process').exec
+        exec('rm -r ' + dir, function (err, stdout, stderr) {
+          exec('mkdir ' + dir)
+          done()
         })
+      }
+
+      if (cache.cacheHandler.directory) {
+        cleanup(path.resolve(cache.cacheHandler.directory))
+      } else {
+        done()
       }
     })
 
@@ -31,14 +39,11 @@ describe('RedisCache', function () {
       // new cache with incorrect configuration
       cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6378 } })
       cache.set('key1', 'data')
-
       // check a file exists
-      setTimeout(function() {
-        fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-          (!err).should.eql(true)
-          done()
-        })
-      }, 500)
+      fs.stat(path.resolve(path.join(cache.cacheHandler.directory, 'key1.json')), (err, stats) => {
+        stats.should.exist
+        done()
+      })
     })
 
     it('should add to Redis cache when a String is passed', sinon.test(function(done) {
@@ -138,5 +143,28 @@ describe('RedisCache', function () {
         console.log(err)
       })
     }))
+  })
+
+  describe.skip('EventEmitter', function(){
+    describe('#emit()', function(){
+      it('should invoke the callback', function(){
+        var spy = sinon.spy();
+        var emitter = new EventEmitter;
+
+        emitter.on('foo', spy);
+        emitter.emit('foo');
+        spy.called.should.equal.true;
+      })
+
+      it('should pass arguments to the callbacks', function(){
+        var spy = sinon.spy();
+        var emitter = new EventEmitter;
+
+        emitter.on('foo', spy);
+        emitter.emit('foo', 'bar', 'baz');
+        sinon.assert.calledOnce(spy);
+        sinon.assert.calledWith(spy, 'bar', 'baz');
+      })
+    })
   })
 })

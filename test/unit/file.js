@@ -7,6 +7,7 @@ var Cache = require(__dirname + '/../../lib/index')
 var FileCache = require(__dirname + '/../../lib/file')
 
 describe('FileCache', function () {
+
   it('should use empty string extension if none is specfied', function () {
     var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
     var handler = cache.cacheHandler
@@ -17,6 +18,53 @@ describe('FileCache', function () {
     var cache = new Cache({ directory: { enabled: true, path: './cache', extension: 'json' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
     var handler = cache.cacheHandler
     return handler.extension.should.eql('.json')
+  })
+
+  it('should use default cleanse interval if none is specfied', function () {
+    var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+
+    cache.cacheHandler.cleanseInterval.should.not.be.NaN()
+    cache.cacheHandler.cleanseInterval.should.be.above(0)
+  })
+
+  it('should use cleanse interval if one is specfied', function () {
+    var specificCleanseInterval = 600
+    var cache = new Cache({ directory: { zzz: 'abc', enabled: true, path: './cache', cleanseInterval: specificCleanseInterval }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+
+    cache.cacheHandler.cleanseInterval.should.not.be.NaN()
+    cache.cacheHandler.cleanseInterval.should.equal(specificCleanseInterval)
+  })
+
+  it('should remove an expired file when cache cleansing is enabled', function (done) {
+    var cache = new Cache({ ttl: 1, directory: { zzz: 'xyz', enabled: true, path: './cache', cleanseEnabled: true, cleanseInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+    var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
+    fs.writeFileSync(filePath, 'testfile')
+
+    this.timeout(3000)
+    setTimeout(() => {
+      fs.stat(filePath, (err, stats) => {
+        should.exist(err)
+        should.not.exist(stats)
+        cache.cacheHandler.disableCacheCleansing()
+        done()
+      })
+    }, 2000)
+  })
+
+  it('should not remove an unexpired file when cache cleansing is enabled', function (done) {
+    var cache = new Cache({ ttl: 60, directory: { enabled: true, path: './cache', cleanseEnabled: true, cleanseInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+    var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
+    fs.writeFileSync(filePath, 'testfile')
+
+    this.timeout(3000)
+    setTimeout(() => {
+      fs.stat(filePath, (err, stats) => {
+        should.not.exist(err)
+        should.exist(stats)
+        cache.cacheHandler.disableCacheCleansing()
+        done()
+      })
+    }, 2000)
   })
 
   describe('set', function () {

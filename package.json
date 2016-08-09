@@ -15,6 +15,7 @@
     "dbc": "^3.0.0",
     "ioredis": "^2.2.0",
     "mkdirp": "^0.5.1",
+    "recursive-readdir": "^2.0.0",
     "redis": "^2.6.2",
     "redis-rstream": "^0.1.2",
     "redis-wstream": "^0.2.5",

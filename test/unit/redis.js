@@ -39,9 +39,10 @@ describe('RedisCache', function () {
       // new cache with incorrect configuration
       cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6378 } })
       cache.set('key1', 'data')
+
       // check a file exists
       fs.stat(path.resolve(path.join(cache.cacheHandler.directory, 'key1.json')), (err, stats) => {
-        stats.should.exist
+        should.exist(stats)
         done()
       })
     })

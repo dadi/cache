@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const should = require('should')
 const redis = require('ioredis')
+const toString = require('stream-to-string')
 
 const Cache = require(__dirname + '/../../lib/index')
 const RedisCache = require(__dirname + '/../../lib/redis')
@@ -69,9 +70,13 @@ describe('RedisCache', function () {
 
     cache.cacheHandler.on('ready', () => {
       cache.set('foo', 'bar')
-      cache.get('foo').then((res) => {
-        res.should.eql('bar')
-        done()
+      cache.get('foo').then((stream) => {
+        toString(stream, (err, data) => {
+          data.should.eql('bar')
+          done()
+        })
+      }).catch((err) => {
+        console.log(err)
       })
     })
   })

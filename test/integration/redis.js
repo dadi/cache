@@ -60,7 +60,7 @@ describe('RedisCache', function () {
             cache.get('foo')
               .then(() => {})
               .catch((err) => {
-                (typeof err).should.equal('Error')
+                (err instanceof Error).should.equal(true)
                 err.message.should.eql('The specified key does not exist')
                 done()
               })

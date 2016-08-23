@@ -1,6 +1,6 @@
 # DADI Cache
 
-[![npm (scoped)](https://img.shields.io/npm/v/@dadi/cache.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cache)&nbsp;[![coverage](https://img.shields.io/badge/coverage-85%25-yellow.svg?style=flat-square)](https://github.com/dadi/cache)&nbsp;[![Build](http://ci.dadi.technology/dadi/cache/badge?branch=master&service=shield)](http://ci.dadi.technology/dadi/cache)
+[![npm (scoped)](https://img.shields.io/npm/v/@dadi/cache.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cache)&nbsp;[![coverage](https://img.shields.io/badge/coverage-84%25-yellow.svg?style=flat-square)](https://github.com/dadi/cache)&nbsp;[![Build](http://ci.dadi.technology/dadi/cache/badge?branch=master&service=shield)](http://ci.dadi.technology/dadi/cache)
 
 ## Overview
 

@@ -17,7 +17,7 @@ const RedisCache = require(__dirname + '/../../lib/redis')
 RedisMock.prototype.on = () => {}
 RedisMock.prototype.getrange = () => {}
 RedisMock.prototype.expire = () => {}
-RedisMock.prototype.status = 'ready'
+RedisMock.prototype.connected = () => {}
 
 var cache
 
@@ -134,7 +134,7 @@ describe('RedisCache', () => {
 
       const client = new RedisMock()
       this.stub(client, 'exists').yields(null, 1)
-
+      this.stub(client, 'connected').yields(null, true)
       const getRange = this.stub(client, 'getrange')
       getRange.withArgs(new Buffer('key1'), 0, 16383).yields(null, new Buffer('data'))
       getRange.withArgs(new Buffer('key1'), 16384, 32767).yields(null, new Buffer(''))

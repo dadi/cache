@@ -72,4 +72,55 @@ describe('RedisCache', function () {
     })
   })
 
+  describe('Non-clustered instance (127.0.0.1:6379)', () => {
+    it.skip('should connect to a redis cluster', (done) => {
+      cache = new Cache({
+        directory: {
+          enabled: false
+        },
+        redis: {
+          enabled: true,
+          cluster: true,
+          hosts: [
+            { host: '127.0.0.1', port: 7000 },
+            { host: '127.0.0.1', port: 7001 },
+            { host: '127.0.0.1', port: 7002 }
+          ]
+        }
+      })
+
+      cache.cacheHandler.on('ready', () => {
+        done()
+      })
+    })
+
+    it.skip('should write and read from a redis cluster', (done) => {
+      cache = new Cache({
+        directory: {
+          enabled: false
+        },
+        redis: {
+          enabled: true,
+          cluster: true,
+          hosts: [
+            { host: '127.0.0.1', port: 7000 },
+            { host: '127.0.0.1', port: 7001 },
+            { host: '127.0.0.1', port: 7002 }
+          ]
+        }
+      })
+
+      cache.cacheHandler.on('ready', () => {
+        cache.set('foo', 'bar')
+        cache.get('foo').then((stream) => {
+          toString(stream, (err, data) => {
+            data.should.eql('bar')
+            done()
+          })
+        }).catch((err) => {
+          console.log(err)
+        })
+      })
+    })
+  })
 })

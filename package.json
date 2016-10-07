@@ -1,7 +1,7 @@
 {
   "name": "@dadi/cache",
   "version": "1.0.0",
-  "description": "",
+  "description": "A caching layer supporting Redis and filesystem caching, used in core DADI products",
   "main": "lib/index.js",
   "scripts": {
     "docs": "jsdoc -c ./docs/docconf.json -t ./node_modules/ink-docstrap/template -R README.md -r lib -d docs",

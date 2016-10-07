@@ -5,7 +5,6 @@
 [![Build Status](https://travis-ci.org/dadi/cache.svg?branch=master)](https://travis-ci.org/dadi/cache)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](http://standardjs.com/)
 
-
 ## Overview
 
 Removing the complexity involved in setting up two separate cache handlers for every project, DADI Cache can use either the filesystem or a Redis instance to store and retrieve content.

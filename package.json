@@ -1,6 +1,6 @@
 {
   "name": "@dadi/cache",
-  "version": "0.0.1-Beta",
+  "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "DADI <team@dadi.tech>",
   "license": "ISC",
   "dependencies": {
-    "@dadi/logger": "^1.1.1",
+    "@dadi/logger": "latest",
     "dbc": "^3.0.0",
     "ioredis": "^2.2.0",
     "mkdirp": "^0.5.1",
@@ -19,7 +19,6 @@
     "redis": "^2.6.2",
     "redis-rstream": "^0.1.2",
     "redis-wstream": "^0.2.5",
-    "standard": "^7.1.2",
     "stream-to-string": "^1.1.0",
     "streamifier": "^0.1.1",
     "underscore": "^1.8.3"
@@ -35,6 +34,7 @@
     "mock-redis-client": "^0.91.13",
     "should": "^10.0.0",
     "sinon": "^1.17.5",
+    "standard": "latest",
     "supertest": "^2.0.0"
   }
 }

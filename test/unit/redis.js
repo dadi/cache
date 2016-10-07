@@ -15,8 +15,6 @@ const RedisCache = require(__dirname + '/../../lib/redis')
 
 /* RedisMock is not complete, so must create some stubs */
 RedisMock.prototype.on = () => {}
-RedisMock.prototype.getrange = () => {}
-RedisMock.prototype.expire = () => {}
 RedisMock.prototype.status = 'ready'
 
 var cache

@@ -1,7 +1,7 @@
 # DADI Cache
 
 [![npm (scoped)](https://img.shields.io/npm/v/@dadi/cache.svg?maxAge=10800&style=flat-square)](https://www.npmjs.com/package/@dadi/cache)
-[![coverage](https://img.shields.io/badge/coverage-84%25-yellow.svg?style=flat-square)](https://github.com/dadi/cache)
+[![coverage](https://img.shields.io/badge/coverage-83%25-yellow.svg?style=flat-square)](https://github.com/dadi/cache)
 [![Build Status](https://travis-ci.org/dadi/cache.svg?branch=master)](https://travis-ci.org/dadi/cache)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](http://standardjs.com/)
 

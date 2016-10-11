@@ -191,6 +191,8 @@ hosts|When `cluster: true`, Cache uses this array of hosts to connect. Each arra
 
 To connect to a Redis cluster an array of hosts must be specified, rather than a single host and port.
 
+> The array does not need to contain all your cluster nodes, but a few so that if one is unreachable the next one will be tried. DADI Cache will discover other nodes automatically when at least one node is connnected.
+
 ```json
 {
   "directory": {

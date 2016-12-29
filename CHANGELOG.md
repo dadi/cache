@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.0] - 2016-12-29
+### Changed
+* Configuration properties `cleanseEnabled` and `cleanseInterval` have been renamed to `autoFlush` and `autoFlushInterval` respectively.
+
 ## [1.1.1] - 2016-10-12
 ### Added
 - further configuration options documentation for file caching

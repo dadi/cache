@@ -154,8 +154,8 @@ enabled|If true, caching is enabled using the following settings|true|
 path|The absolute or relative path to the directory for cache files|"./cache"|"/tmp/dadi-cache/"
 extension| (optional) The extension to use for cache files| none | "json"
 directoryChunkSize| (optional) If set, cache files are stored in a series of subdirectories based on the cache key| 0 | 5
-cleanseEnabled | If true, DADI Cache will clear cache files at the interval specified by `cleanseInterval` | false | true
-cleanseInterval | The period of time between clearing cache files (in seconds) | 300 | 1800
+autoFlush | If true, DADI Cache will clear cache files that are older than the specified TTL setting, at the interval specified by `autoFlushInterval` | false | true
+autoFlushInterval | The period of time between clearing cache files (in seconds) | 300 | 1800
 
 ### Redis caching
 

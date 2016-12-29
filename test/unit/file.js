@@ -20,23 +20,23 @@ describe('FileCache', function () {
     return handler.extension.should.eql('.json')
   })
 
-  it('should use default cleanse interval if none is specfied', function () {
+  it('should use default autoFlush interval if none is specfied', function () {
     var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
 
-    cache.cacheHandler.cleanseInterval.should.not.be.NaN()
-    cache.cacheHandler.cleanseInterval.should.be.above(0)
+    cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
+    cache.cacheHandler.autoFlushInterval.should.be.above(0)
   })
 
-  it('should use cleanse interval if one is specfied', function () {
-    var specificCleanseInterval = 600
-    var cache = new Cache({ directory: { zzz: 'abc', enabled: true, path: './cache', cleanseInterval: specificCleanseInterval }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+  it('should use autoFlush interval if one is specfied', function () {
+    var specificautoFlushInterval = 600
+    var cache = new Cache({ directory: { zzz: 'abc', enabled: true, path: './cache', autoFlushInterval: specificautoFlushInterval }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
 
-    cache.cacheHandler.cleanseInterval.should.not.be.NaN()
-    cache.cacheHandler.cleanseInterval.should.equal(specificCleanseInterval)
+    cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
+    cache.cacheHandler.autoFlushInterval.should.equal(specificautoFlushInterval)
   })
 
   it('should remove an expired file when cache cleansing is enabled', function (done) {
-    var cache = new Cache({ ttl: 1, directory: { zzz: 'xyz', enabled: true, path: './cache', cleanseEnabled: true, cleanseInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+    var cache = new Cache({ ttl: 1, directory: { zzz: 'xyz', enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
     var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
     fs.writeFileSync(filePath, 'testfile')
 
@@ -45,14 +45,14 @@ describe('FileCache', function () {
       fs.stat(filePath, (err, stats) => {
         should.exist(err)
         should.not.exist(stats)
-        cache.cacheHandler.disableCacheCleansing()
+        cache.cacheHandler.disableAutoFlush()
         done()
       })
     }, 2000)
   })
 
   it('should not remove an unexpired file when cache cleansing is enabled', function (done) {
-    var cache = new Cache({ ttl: 60, directory: { enabled: true, path: './cache', cleanseEnabled: true, cleanseInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+    var cache = new Cache({ ttl: 60, directory: { enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
     var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
     fs.writeFileSync(filePath, 'testfile')
 
@@ -61,7 +61,7 @@ describe('FileCache', function () {
       fs.stat(filePath, (err, stats) => {
         should.not.exist(err)
         should.exist(stats)
-        cache.cacheHandler.disableCacheCleansing()
+        cache.cacheHandler.disableAutoFlush()
         done()
       })
     }, 2000)

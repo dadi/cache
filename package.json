@@ -1,13 +1,22 @@
 {
   "name": "@dadi/cache",
-  "version": "1.3.0",
+  "version": "0.0.0-development",
   "description": "A caching layer supporting Redis and filesystem caching, used in core DADI products",
   "main": "lib/index.js",
   "scripts": {
     "docs": "jsdoc -c ./docs/docconf.json -t ./node_modules/ink-docstrap/template -R README.md -r lib -d docs",
     "test": "standard lib && env NODE_ENV=test ./node_modules/.bin/istanbul cover --report cobertura --report text --report html --report lcov ./node_modules/.bin/_mocha test",
-    "posttest": "./scripts/coverage.js"
+    "posttest": "./scripts/coverage.js",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dadi/cache.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dadi/cache/issues"
+  },
+  "homepage": "https://github.com/dadi/cache",
   "author": "DADI <team@dadi.tech>",
   "license": "ISC",
   "dependencies": {
@@ -35,6 +44,7 @@
     "should": "^10.0.0",
     "sinon": "^1.17.5",
     "standard": "latest",
-    "supertest": "^2.0.0"
+    "supertest": "^2.0.0",
+    "semantic-release": "^6.3.2"
   }
 }

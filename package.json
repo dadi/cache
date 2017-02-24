@@ -20,9 +20,8 @@
   "author": "DADI <team@dadi.tech>",
   "license": "ISC",
   "dependencies": {
-    "@dadi/logger": "latest",
     "dbc": "^3.0.0",
-    "ioredis": "^2.2.0",
+    "ioredis": "2.x.0",
     "mkdirp": "^0.5.1",
     "recursive-readdir": "^2.0.0",
     "redis": "^2.6.2",
@@ -33,18 +32,20 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "concat-stream": "^1.6.0",
     "env-test": "^1.0.0",
     "fakeredis": "^1.0.3",
     "ink-docstrap": "latest",
     "ioredis-mock": "^1.7.0",
     "istanbul": "^0.4.4",
     "istanbul-cobertura-badger": "^1.2.1",
+    "length-stream": "^0.1.1",
     "mocha": "^2.5.3",
     "mock-redis-client": "^0.91.13",
+    "semantic-release": "^6.3.2",
     "should": "^10.0.0",
     "sinon": "^1.17.5",
     "standard": "latest",
-    "supertest": "^2.0.0",
-    "semantic-release": "^6.3.2"
+    "supertest": "^2.0.0"
   }
 }

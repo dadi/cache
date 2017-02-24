@@ -20,9 +20,7 @@ RedisMock.prototype.status = 'ready'
 var cache
 
 describe('RedisCache', () => {
-
   describe('set', () => {
-
     after((done) => {
       // remove cache folder contents completely, and recreate
       const cleanup = (dir) => {
@@ -42,6 +40,9 @@ describe('RedisCache', () => {
     it('should fallback to file cache when `set` is called and Redis is not connected', function(done) {
       // new cache with incorrect configuration
       cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6378 } })
+
+      cache.on('message', (msg) => console.log(msg))
+
       cache.set('key1', 'data')
 
       // check a file exists
@@ -95,6 +96,52 @@ describe('RedisCache', () => {
       spy.called.should.eql(true)
       spy.firstCall.args[0].indexOf('key-stream').should.be.above(-1)
       done()
+    }))
+
+    it('should set and return binary data', sinon.test(function(done) {
+      this.timeout(5000)
+      // const client = new RedisMock()
+      // this.stub(redis, 'createClient').returns(client)
+      // const spy = this.spy(client, 'set')
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+
+      var concat = require('concat-stream')
+      var lengthStream = require('length-stream')
+      var inputLength = 0
+      var outputLength = 0
+
+      function lengthListener (length) {
+        inputLength = length
+      }
+
+      function lengthListener2 (length) {
+        outputLength = length
+      }
+
+      function handleBuffer1 (buffer) { }
+      function handleBuffer2 (buffer) {
+        console.log(inputLength)
+        console.log(outputLength)
+        // fs.createWriteStream(__dirname + '/../cat2.png')
+        done()
+      }
+
+      var P = require('stream').PassThrough
+      var inputStream = new P()
+      var concatStream1 = concat(handleBuffer1)
+      var catStream = fs.createReadStream(__dirname + '/../cat.png', { encoding: null })
+      catStream.pipe(lengthStream(lengthListener)).pipe(concatStream1)
+
+      cache.on('ready', () => {
+        cache.set('cat-stream', catStream).then(() => {
+          cache.get('cat-stream').then((outStream) => {
+            var concatStream2 = concat(handleBuffer2)
+            var out = fs.createWriteStream(__dirname + '/../cat2.png')
+            outStream.pipe(lengthStream(lengthListener2)).pipe(out)
+            done()
+          })
+        })
+      })
     }))
   })
 

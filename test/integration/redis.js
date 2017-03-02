@@ -13,7 +13,6 @@ const RedisCache = require(__dirname + '/../../lib/redis')
 var cache
 
 describe('RedisCache', function () {
-
   describe('Non-clustered instance (127.0.0.1:6379)', () => {
     const redisConfig = {
       enabled: true,
@@ -64,6 +63,8 @@ describe('RedisCache', function () {
                 err.message.should.eql('The specified key does not exist')
                 done()
               })
+          }).catch((err) => {
+            console.log('flush err', err)
           })
         }).catch((err) => {
           console.log('set err', err)

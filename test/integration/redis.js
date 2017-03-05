@@ -13,7 +13,6 @@ const RedisCache = require(__dirname + '/../../lib/redis')
 var cache
 
 describe('RedisCache', function () {
-
   describe('Non-clustered instance (127.0.0.1:6379)', () => {
     const redisConfig = {
       enabled: true,
@@ -28,14 +27,14 @@ describe('RedisCache', function () {
     })
 
     it('should connect to redis', (done) => {
-      cache = new Cache({ directory: { enabled: false }, redis: redisConfig })
+      cache = Cache({ directory: { enabled: false }, redis: redisConfig })
       cache.cacheHandler.on('ready', () => {
         done()
       })
     })
 
     it('should read and write to redis', (done) => {
-      cache = new Cache({ directory: { enabled: false }, redis: redisConfig })
+      cache = Cache({ directory: { enabled: false }, redis: redisConfig })
       cache.cacheHandler.on('ready', () => {
         cache.set('foo', 'bar').then(() => {
           cache.get('foo').then((stream) => {
@@ -53,7 +52,7 @@ describe('RedisCache', function () {
     })
 
     it('should flush the cache', (done) => {
-      cache = new Cache({ directory: { enabled: false }, redis: redisConfig })
+      cache = Cache({ directory: { enabled: false }, redis: redisConfig })
       cache.cacheHandler.on('ready', () => {
         cache.set('foo', 'bar').then(() => {
           cache.flush().then(() => {
@@ -64,6 +63,8 @@ describe('RedisCache', function () {
                 err.message.should.eql('The specified key does not exist')
                 done()
               })
+          }).catch((err) => {
+            console.log('flush err', err)
           })
         }).catch((err) => {
           console.log('set err', err)
@@ -74,7 +75,7 @@ describe('RedisCache', function () {
 
   describe('Non-clustered instance (127.0.0.1:6379)', () => {
     it.skip('should connect to a redis cluster', (done) => {
-      cache = new Cache({
+      cache = Cache({
         directory: {
           enabled: false
         },
@@ -95,7 +96,7 @@ describe('RedisCache', function () {
     })
 
     it.skip('should write and read from a redis cluster', (done) => {
-      cache = new Cache({
+      cache = Cache({
         directory: {
           enabled: false
         },

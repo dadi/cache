@@ -37,5 +37,4 @@ describe('FileCache', function () {
       console.log('set err', err)
     })
   })
-
 })

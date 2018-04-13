@@ -1,6 +1,5 @@
 'use strict'
 
-const _ = require('underscore')
 const fs = require('fs')
 const path = require('path')
 const should = require('should')

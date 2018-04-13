@@ -39,11 +39,20 @@ npm install @dadi/cache --save
 
 ```js
 // require the module
-var Cache = require('@dadi/cache')
+const Cache = require('@dadi/cache')
 
 // setup the options for caching
-// default if not specified: { directory: { enabled: true, path: './cache' }, redis: { enabled: false } }
-var options = {
+// defaults if nothing specified: 
+// {
+//   directory: {
+//     enabled: true,
+//     path: './cache'
+//   },
+//   redis: {
+//     enabled: false
+//   }
+// }
+const options = {
   "ttl": 3600,
   "directory": {
     "enabled": false,
@@ -56,7 +65,7 @@ var options = {
   }
 }
 
-var cache = new Cache(options)
+const cache = new Cache(options)
 ```
 
 ### Add an item to the cache
@@ -68,12 +77,12 @@ Returns a Promise that returns an empty String if successful, otherwise an Error
 The `data` argument can be a String, Buffer or Stream.
 
 ```js
-var key = 'test-cached-item'
-var data = 'test data'
+let key = 'test-cached-item'
+let data = 'test data'
 
 cache.set(key, data).then(() => {
   // do something
-}).catch((err) => {
+}).catch(err => {
   // Error
 })
 ```
@@ -86,33 +95,33 @@ Returns a Promise that returns a Stream of the cached data if the key exists or 
 The error message returned is "The specified key does not exist".
 
 ```js
-var key = 'test-cached-item'
+let key = 'test-cached-item'
 
-cache.get(key).then((stream) => {
+cache.get(key).then(stream => {
   // do something with the stream
-}).catch((err) => {
-  // "The specified key does not exist"
+}).catch(err => {
+  // err === "The specified key does not exist"
 })
 ```
 
 ### Example real world usage
 
 ```js
-var express = require('express')
-var app = express()
-var dadiCache = require('@dadi/cache')
-var cache = new dadiCache()
+const express = require('express')
+const app = express()
+const dadiCache = require('@dadi/cache')
+const cache = new dadiCache()
 
 app.get(function (req, res) {
-  var key = req.url
+  let key = req.url
 
-  cache.get(key).then((stream) => {
+  cache.get(key).then(stream => {
     // cached data found for req.url
     res.setHeader('X-Cache', 'HIT')
     stream.pipe(res)
-  }).catch((err) => {
+  }).catch(err => {
     // cached data not found for req.url
-    var content = fetchContent()
+    let content = fetchContent()
 
     // cache the content
     cache.set(key, content).then(() => {
@@ -233,7 +242,7 @@ A typical Redis cluster contains three or more masters and several slaves for ea
 
 ```js
 cache.set('foo', 'bar') // This query will be sent to one of the masters.
-cache.get('foo', function (err, res) {
+cache.get('foo', (err, res) => {
   // This query will be sent to one of the slaves.
 })
 ```

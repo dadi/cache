@@ -1,3 +1,4 @@
+var exec = require('child_process').exec
 var fs = require('fs')
 var path = require('path')
 var should = require('should')
@@ -7,7 +8,6 @@ var Cache = require(__dirname + '/../../lib/index')
 var FileCache = require(__dirname + '/../../lib/file')
 
 describe('FileCache', function () {
-
   it('should use empty string extension if none is specfied', function () {
     var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
     var handler = cache.cacheHandler
@@ -20,71 +20,119 @@ describe('FileCache', function () {
     return handler.extension.should.eql('.json')
   })
 
-  it('should use default autoFlush interval if none is specfied', function () {
-    var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+  describe('flush', function () {
+    this.timeout(5000)
 
-    cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
-    cache.cacheHandler.autoFlushInterval.should.be.above(0)
-  })
+    beforeEach(function (done) {
+      var setup = function (dir) {
+        return new Promise((resolve, reject) => {
+          exec('mkdir ' + dir, (err, y, z) => {
+            // console.log(err)
+            return resolve()
+          })
+        })
+      }
 
-  it('should use autoFlush interval if one is specfied', function () {
-    var specificautoFlushInterval = 600
-    var cache = new Cache({ directory: { zzz: 'abc', enabled: true, path: './cache', autoFlushInterval: specificautoFlushInterval }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+      var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+      setTimeout(() => {
+        setup(path.resolve(cache.cacheHandler.directory)).then(done)
+      }, 2000)
+    })
 
-    cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
-    cache.cacheHandler.autoFlushInterval.should.equal(specificautoFlushInterval)
-  })
+    it('should use default autoFlush interval if none is specfied', function () {
+      var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
 
-  it('should remove an expired file when cache cleansing is enabled', function (done) {
-    var cache = new Cache({ ttl: 1, directory: { zzz: 'xyz', enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
-    var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
-    fs.writeFileSync(filePath, 'testfile')
+      cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
+      cache.cacheHandler.autoFlushInterval.should.be.above(0)
+    })
 
-    this.timeout(3000)
-    setTimeout(() => {
-      fs.stat(filePath, (err, stats) => {
-        should.exist(err)
-        should.not.exist(stats)
-        cache.cacheHandler.disableAutoFlush()
-        done()
+    it('should use autoFlush interval if one is specfied', function () {
+      var specificautoFlushInterval = 600
+      var cache = new Cache({ directory: { enabled: true, path: './cache', autoFlushInterval: specificautoFlushInterval }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+
+      cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
+      cache.cacheHandler.autoFlushInterval.should.equal(specificautoFlushInterval)
+    })
+
+    it('should remove an expired file when cache cleansing is enabled', function (done) {
+      var cache = new Cache({ ttl: 1, directory: { enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+      var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
+      fs.writeFileSync(filePath, 'testfile')
+
+      setTimeout(() => {
+        fs.stat(filePath, (err, stats) => {
+          should.exist(err)
+          should.not.exist(stats)
+          done()
+        })
+      }, 2000)
+    })
+
+    it('should remove empty directories when cache cleansing is finished', function (done) {
+      var cache = new Cache({ ttl: 1, directory: { enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+
+      var dir = path.resolve(path.join(cache.cacheHandler.directory, 'test'))
+      exec('mkdir -p ' + dir, (err, y, z) => {
+        var filePath = dir + '/test_file'
+        fs.writeFileSync(filePath, 'testfile')
+
+        setTimeout(() => {
+          fs.stat(dir, (err, stats) => {
+            should.exist(err)
+            should.not.exist(stats)
+            done()
+          })
+        }, 2000)
       })
-    }, 2000)
-  })
+    })
 
-  it('should not remove an unexpired file when cache cleansing is enabled', function (done) {
-    var cache = new Cache({ ttl: 60, directory: { enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
-    var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
-    fs.writeFileSync(filePath, 'testfile')
+    it('should not remove an unexpired file when cache cleansing is enabled', function (done) {
+      var cache = new Cache({ ttl: 60, directory: { enabled: true, path: './cache', autoFlush: true, autoFlushInterval: 1 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+      var filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
+      fs.writeFileSync(filePath, 'testfile')
 
-    this.timeout(3000)
-    setTimeout(() => {
-      fs.stat(filePath, (err, stats) => {
-        should.not.exist(err)
-        should.exist(stats)
-        cache.cacheHandler.disableAutoFlush()
-        done()
-      })
-    }, 2000)
+      setTimeout(() => {
+        fs.stat(filePath, (err, stats) => {
+          should.not.exist(err)
+          should.exist(stats)
+          cache.cacheHandler.disableAutoFlush()
+          done()
+        })
+      }, 2000)
+    })
   })
 
   describe('set', function () {
     var cache = new Cache({ directory: { enabled: true, path: './cache', extension: 'json' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
 
+    beforeEach(function (done) {
+      var setup = function (dir) {
+        return new Promise((resolve, reject) => {
+          exec('mkdir ' + dir)
+          return resolve()
+        })
+      }
+
+      setup(path.resolve(cache.cacheHandler.directory)).then(done)
+    })
+
     afterEach(function () {
       var files = fs.readdirSync(cache.cacheHandler.directory)
       files.forEach((file) => {
-        fs.unlinkSync(cache.cacheHandler.directory + '/' + file)
+        try {
+          fs.unlinkSync(cache.cacheHandler.directory + '/' + file)
+        } catch (err) {}
       })
     })
 
-    it('should generate a cache filename from the directory and key', sinon.test(function() {
+    it('should generate a cache filename from the directory and key', sinon.test(function () {
       var spy = this.spy(fs, 'createWriteStream')
       cache.set('key1', 'data')
 
       return spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
     }))
 
-    it('should create a cache file when a String is passed', function(done) {
+    it('should create a cache file when a String is passed', function (done) {
       cache.set('key1', 'data')
 
       // check a file exists
@@ -94,7 +142,7 @@ describe('FileCache', function () {
       })
     })
 
-    it('should create a cache file when a Buffer is passed', function(done) {
+    it('should create a cache file when a Buffer is passed', function (done) {
       var buffer = new Buffer('data')
       cache.set('key1', buffer)
 
@@ -105,8 +153,8 @@ describe('FileCache', function () {
       })
     })
 
-    it('should create a cache file when a Stream is passed', function(done) {
-      var stream = new Stream.Readable
+    it('should create a cache file when a Stream is passed', function (done) {
+      var stream = new Stream.Readable()
       stream.push('data')
       stream.push(null)
       cache.set('key1', stream)
@@ -125,7 +173,6 @@ describe('FileCache', function () {
     after(function () {
       // remove cache folder contents completely, and recreate
       var cleanup = function (dir) {
-        var exec = require('child_process').exec
         exec('rm -r ' + dir, function (err, stdout, stderr) {
           exec('mkdir ' + dir)
         })
@@ -134,7 +181,7 @@ describe('FileCache', function () {
       cleanup(path.resolve(cache.cacheHandler.directory))
     })
 
-    it('should generate a cache filename from the directory and key', sinon.test(function() {
+    it('should generate a cache filename from the directory and key', sinon.test(function () {
       var spy = this.spy(fs, 'stat')
 
       cache.set('key1', 'data')
@@ -143,7 +190,7 @@ describe('FileCache', function () {
       return spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
     }))
 
-    it('should generate a cache path with subdirectories when directoryChunkSize is set', sinon.test(function() {
+    it('should generate a cache path with subdirectories when directoryChunkSize is set', sinon.test(function () {
       var cacheWithChunks = new Cache({ directory: { enabled: true, path: './cache', extension: 'json', directoryChunkSize: 4 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
       var spy = this.spy(fs, 'stat')
 
@@ -156,7 +203,7 @@ describe('FileCache', function () {
       return spy.firstCall.args[0].should.eql(expectedPath)
     }))
 
-    it('should generate a cache path with uneven-length subdirectories when directoryChunkSize is set', sinon.test(function() {
+    it('should generate a cache path with uneven-length subdirectories when directoryChunkSize is set', sinon.test(function () {
       var cacheWithChunks = new Cache({ directory: { enabled: true, path: './cache', extension: 'json', directoryChunkSize: 7 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
       var spy = this.spy(fs, 'stat')
 
@@ -169,7 +216,7 @@ describe('FileCache', function () {
       return spy.firstCall.args[0].should.eql(expectedPath)
     }))
 
-    it('should reject if the key cannot be found', function(done) {
+    it('should reject if the key cannot be found', function (done) {
       cache.set('key1', 'data')
       cache.get('key2').then((stream) => {
 
@@ -181,7 +228,7 @@ describe('FileCache', function () {
 
     it('should reject if the key has expired')
 
-    it('should return a stream', function(done) {
+    it('should return a stream', function (done) {
       cache.set('key1', 'data')
       cache.get('key1').then((stream) => {
         stream.should.exist

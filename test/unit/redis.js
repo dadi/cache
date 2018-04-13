@@ -1,4 +1,3 @@
-const _ = require('underscore')
 const fs = require('fs')
 const path = require('path')
 const sinon = require('sinon')
@@ -52,7 +51,7 @@ describe('RedisCache', () => {
       done()
     }))
 
-    it('should add to Redis cache when a Buffer is passed', sinon.test(function(done) {
+    it('should add to Redis cache when a Buffer is passed', sinon.test(function (done) {
       const client = new RedisMock()
       this.stub(noderedis, 'createClient').returns(client)
       const spy = this.spy(client, 'set')
@@ -66,14 +65,14 @@ describe('RedisCache', () => {
       done()
     }))
 
-    it('should add to Redis cache when a Stream is passed', sinon.test(function(done) {
+    it('should add to Redis cache when a Stream is passed', sinon.test(function (done) {
       const client = new RedisMock()
       this.stub(noderedis, 'createClient').returns(client)
       const spy = this.spy(client, 'set')
 
       cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
 
-      const stream = new Stream.Readable
+      const stream = new Stream.Readable()
       stream.push('data')
       stream.push(null)
       cache.set('key-stream', stream)
@@ -84,7 +83,7 @@ describe('RedisCache', () => {
       done()
     }))
 
-    it('should set and return binary data', sinon.test(function(done) {
+    it('should set and return binary data', sinon.test(function (done) {
       this.timeout(5000)
       // const client = new RedisMock()
       // this.stub(redis, 'createClient').returns(client)
@@ -130,7 +129,7 @@ describe('RedisCache', () => {
       })
     }))
 
-    it.skip('should fallback to file cache when `set` is called and Redis is not connected', function(done) {
+    it.skip('should fallback to file cache when `set` is called and Redis is not connected', function (done) {
       this.timeout(15000)
 
       process.on('uncaughtException', (err) => {
@@ -145,7 +144,7 @@ describe('RedisCache', () => {
 
       cache.set('key1', 'data').then(() => {
         // check a file exists
-        setTimeout(function() {
+        setTimeout(function () {
           fs.stat(path.resolve(path.join(cache.cacheHandler.directory, 'key1.json')), (err, stats) => {
             should.exist(stats)
             done()
@@ -158,11 +157,10 @@ describe('RedisCache', () => {
   })
 
   describe('get', function () {
-
     afterEach(function () {
     })
 
-    it.skip('should fallback to file cache when `get` is called and Redis is not connected', sinon.test(function() {
+    it.skip('should fallback to file cache when `get` is called and Redis is not connected', sinon.test(function () {
       cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6378 } })
       return cache.get('key2').then((stream) => {
 
@@ -172,7 +170,7 @@ describe('RedisCache', () => {
       })
     }))
 
-    it('should reject if the key cannot be found', sinon.test(function() {
+    it('should reject if the key cannot be found', sinon.test(function () {
       const client = new RedisMock()
       this.stub(client, 'exists').yields(null, 0)
       this.stub(noderedis, 'createClient').returns(client)
@@ -184,8 +182,8 @@ describe('RedisCache', () => {
       })
     }))
 
-    it('should return a stream', sinon.test(function(done) {
-      const stream = new Stream.Readable
+    it('should return a stream', sinon.test(function (done) {
+      const stream = new Stream.Readable()
       stream.push('data')
       stream.push(null)
 
@@ -210,25 +208,25 @@ describe('RedisCache', () => {
     }))
   })
 
-  describe('EventEmitter', function(){
-    describe('#emit()', function(){
-      it('should invoke the callback', function(){
-        const spy = sinon.spy();
-        const emitter = new EventEmitter;
+  describe('EventEmitter', function () {
+    describe('#emit()', function () {
+      it('should invoke the callback', function () {
+        const spy = sinon.spy()
+        const emitter = new EventEmitter()
 
-        emitter.on('foo', spy);
-        emitter.emit('foo');
-        spy.called.should.equal.true;
+        emitter.on('foo', spy)
+        emitter.emit('foo')
+        spy.called.should.equal.true
       })
 
-      it('should pass arguments to the callbacks', function(){
-        const spy = sinon.spy();
-        const emitter = new EventEmitter;
+      it('should pass arguments to the callbacks', function () {
+        const spy = sinon.spy()
+        const emitter = new EventEmitter()
 
-        emitter.on('foo', spy);
-        emitter.emit('foo', 'bar', 'baz');
-        sinon.assert.calledOnce(spy);
-        sinon.assert.calledWith(spy, 'bar', 'baz');
+        emitter.on('foo', spy)
+        emitter.emit('foo', 'bar', 'baz')
+        sinon.assert.calledOnce(spy)
+        sinon.assert.calledWith(spy, 'bar', 'baz')
       })
     })
   })

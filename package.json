@@ -22,6 +22,7 @@
   "dependencies": {
     "dbc": "^3.0.0",
     "debug": "^2.6.1",
+    "deepmerge": "^2.1.0",
     "ioredis": "2.5.0",
     "mkdirp": "0.5.1",
     "node-redis-streamify": "0.1.6",
@@ -29,10 +30,9 @@
     "redis": "2.6.2",
     "redis-rstream": "0.1.2",
     "redis-wstream": "0.2.5",
+    "remove-empty-directories": "0.0.1",
     "stream-to-string": "1.1.0",
-    "streamifier": "0.1.1",
-    "underscore": "1.8.3",
-    "underscore-deep-extend": "^1.1.5"
+    "streamifier": "0.1.1"
   },
   "devDependencies": {
     "concat-stream": "^1.6.0",

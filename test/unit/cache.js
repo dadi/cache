@@ -25,6 +25,11 @@ describe('Cache', function () {
     return cache.enabled.should.eql(true)
   })
 
+  it('should ignore falsy keys', function () {
+    var cache = new Cache({ expireAt: null, directory: { enabled: true, path: './cache' }, redis: { enabled: false } })
+    return cache.enabled.should.eql(true)
+  })
+
   // it('should throw if type == redis && host == null', function () {
   //   return should.throws(function() { var cache = new Cache({ type: 'redis', enabled: true }) })
   // })

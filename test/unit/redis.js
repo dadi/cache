@@ -300,13 +300,13 @@ describe('RedisCache', () => {
       })
     }))
 
-    it('should throw when there is no metadata for the given key', sinon.test(function (done) {
+    it('should return null when there is no metadata for the given key', sinon.test(function (done) {
       const client = new RedisMock()
       this.stub(noderedis, 'createClient').returns(client)
 
       cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
-      cache.getMetadata('key-that-does-not-exist').catch(err => {
-        err.message.should.eql('The specified key does not have any metadata')
+      cache.getMetadata('key-that-does-not-exist').then(err => {
+        should.equal(err, null)
 
         done()
       })

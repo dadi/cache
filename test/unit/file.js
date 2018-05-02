@@ -288,10 +288,8 @@ describe('FileCache', function () {
             'The specified key does not exist'
           )
 
-          return cache.getMetadata('key2').catch(err => {
-            err.message.should.eql(
-              'The specified key does not have any metadata'
-            )
+          return cache.getMetadata('key2').then(result => {
+            should.equal(result, null)
 
             done()
           })
@@ -314,6 +312,12 @@ describe('FileCache', function () {
         return cache.get('key3')
       }).then(result => {
         result.should.eql(metadata)
+      })
+    })
+
+    it('should return null when trying to get metadata for a key that doesn\'t have any', () => {
+      return cache.getMetadata('key-that-does-not-exist').then(result => {
+        should.equal(result, null)
       })
     })
   })

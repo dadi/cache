@@ -25,6 +25,7 @@
     "debug": "^2.6.1",
     "deepmerge": "^2.1.0",
     "ioredis": "2.5.0",
+    "lokijs": "^1.5.3",
     "mkdirp": "0.5.1",
     "node-redis-streamify": "0.1.6",
     "recursive-readdir": "2.1.1",

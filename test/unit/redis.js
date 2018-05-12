@@ -51,6 +51,27 @@ describe('RedisCache', () => {
       done()
     }))
 
+    it('should add to Redis cache and save metadata when a String and options.metadata are passed', sinon.test(function (done) {
+      const client = new RedisMock()
+      this.stub(noderedis, 'createClient').returns(client)
+      const spy = this.spy(client, 'set')
+
+      let metadata = {
+        foo: 'bar',
+        baz: 123
+      }
+
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+      cache.set('key-string', 'data', { metadata }).then(() => {
+        spy.called.should.eql(true)
+        spy.firstCall.args[0].indexOf('key-string').should.be.above(-1)
+        spy.secondCall.args[0].should.eql('___key-string___')
+        spy.secondCall.args[1].should.eql(JSON.stringify(metadata))
+
+        done()
+      })
+    }))
+
     it('should add to Redis cache when a Buffer is passed', sinon.test(function (done) {
       const client = new RedisMock()
       this.stub(noderedis, 'createClient').returns(client)
@@ -63,6 +84,29 @@ describe('RedisCache', () => {
       spy.called.should.eql(true)
       spy.firstCall.args[0].indexOf('key-buffer').should.be.above(-1)
       done()
+    }))
+
+    it('should add to Redis cache and save metadata when a Buffer and options.metadata are passed', sinon.test(function (done) {
+      const client = new RedisMock()
+      this.stub(noderedis, 'createClient').returns(client)
+      const spy = this.spy(client, 'set')
+
+      let metadata = {
+        foo: 'bar',
+        baz: 123
+      }
+
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+      cache.set('key-buffer', new Buffer('data'), { metadata }).then(() => {
+        // check params passed to SET
+        spy.called.should.eql(true)
+        spy.firstCall.args[0].indexOf('key-buffer').should.be.above(-1)
+
+        spy.secondCall.args[0].should.eql('___key-buffer___')
+        spy.secondCall.args[1].should.eql(JSON.stringify(metadata))
+
+        done()        
+      })
     }))
 
     it('should add to Redis cache when a Stream is passed', sinon.test(function (done) {
@@ -81,6 +125,33 @@ describe('RedisCache', () => {
       spy.called.should.eql(true)
       spy.firstCall.args[0].indexOf('key-stream').should.be.above(-1)
       done()
+    }))
+
+    it('should add to Redis cache and save metadata when a Stream and options.metadata are passed', sinon.test(function (done) {
+      const client = new RedisMock()
+      this.stub(noderedis, 'createClient').returns(client)
+      const spy = this.spy(client, 'set')
+
+      let metadata = {
+        foo: 'bar',
+        baz: 123
+      }
+
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+
+      const stream = new Stream.Readable()
+      stream.push('data')
+      stream.push(null)
+      cache.set('key-stream', stream, { metadata }).then(() => {
+        // check params passed to SET
+        spy.called.should.eql(true)
+        spy.firstCall.args[0].indexOf('key-stream').should.be.above(-1)
+
+        spy.secondCall.args[0].should.eql('___key-stream___')
+        spy.secondCall.args[1].should.eql(JSON.stringify(metadata))
+
+        done()
+      })
     }))
 
     it('should set and return binary data', sinon.test(function (done) {
@@ -204,6 +275,78 @@ describe('RedisCache', () => {
         })
       }).catch((err) => {
         console.log(err)
+      })
+    }))
+  })
+
+  describe('getMetadata', function () {
+    it('should return and parse metadata', sinon.test(function (done) {
+      const client = new RedisMock()
+      this.stub(noderedis, 'createClient').returns(client)
+      const spy = this.spy(client, 'set')
+
+      let metadata = {
+        foo: 'bar',
+        baz: 123
+      }
+
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+      cache.set('key-string', 'data', { metadata }).then(() => {
+        cache.getMetadata('key-string').then(metadata => {
+          metadata.should.eql(metadata)
+
+          done()
+        })
+      })
+    }))
+
+    it('should return null when there is no metadata for the given key', sinon.test(function (done) {
+      const client = new RedisMock()
+      this.stub(noderedis, 'createClient').returns(client)
+
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+      cache.getMetadata('key-that-does-not-exist').then(err => {
+        should.equal(err, null)
+
+        done()
+      })
+    }))
+  })
+
+  describe('flush', function () {
+    it('should delete the keys that match a given pattern, along with any associated metadata', sinon.test(function (done) {
+      let MockStreamified = function () {}
+
+      MockStreamified.prototype.on = function (event, handler) {
+        if (event === 'data') {
+          this.dataFn = handler
+        } else if (event === 'end') {
+          this.dataFn('test-key')
+
+          handler()
+        }
+
+        return this
+      }
+
+      RedisMock.prototype.streamified = function (method) {
+        let mockStreamified = new MockStreamified()
+
+        return () => mockStreamified
+      }
+
+      const client = new RedisMock()
+      this.stub(noderedis, 'createClient').returns(client)
+      const spy = this.spy(client, 'del')
+
+      cache = new Cache({ directory: { enabled: false, path: './cache', extension: 'json' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+      cache.set('key-string', 'data').then(() => {
+        cache.flush('key-string').then(() => {
+          spy.firstCall.args[0].should.eql('test-key')
+          spy.secondCall.args[0].should.eql('___test-key___')
+
+          done()
+        })
       })
     }))
   })

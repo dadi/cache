@@ -1,5 +1,6 @@
 var exec = require('child_process').exec
 var fs = require('fs')
+var fsExtra = require('fs-extra')
 var path = require('path')
 var should = require('should')
 var sinon = require('sinon')
@@ -163,6 +164,160 @@ describe('FileCache', function () {
       fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
         (!err).should.eql(true)
         done()
+      })
+    })
+  })
+
+  describe('metadata', function () {
+    this.timeout(5000)
+
+    let cache
+    let metadata = {
+      foo: 'bar',
+      baz: 123
+    }
+
+    beforeEach(done => {
+      cache = new Cache({
+        directory: {
+          enabled: true,
+          path: './cache',
+          extension: 'json'
+        },
+        redis: {
+          enabled: false,
+          host: '127.0.0.1',
+          port: 6379
+        }
+      })
+
+      setTimeout(done, 2000)
+    })
+
+    afterEach(() => {
+      fsExtra.removeSync(
+        path.join(__dirname, './../../db.json')
+      )
+    })
+
+    it('should save metadata alongside a String payload', () => {
+      return cache.set('key1', 'data', { metadata }).then(() => {
+        return cache.get('key1')
+      }).then(result => {
+        should.exist(result)
+
+        return cache.getMetadata('key1')
+      }).then(result => {
+        result.should.eql(metadata)
+      })
+    })
+
+    it('should save metadata alongside a Buffer payload', () => {
+      let buffer = new Buffer('data')
+
+      return cache.set('key1', buffer, { metadata }).then(() => {
+        return cache.get('key1')
+      }).then(result => {
+        should.exist(result)
+
+        return cache.getMetadata('key1')
+      }).then(result => {
+        result.should.eql(metadata)
+      })
+    })
+
+    it('should save metadata alongside a Stream payload', () => {
+      let stream = new Stream.Readable()
+      stream.push('data')
+      stream.push(null)
+
+      return cache.set('key1', stream, { metadata }).then(() => {
+        return cache.get('key1')
+      }).then(result => {
+        return cache.getMetadata('key1')
+      }).then(result => {
+        result.should.eql(metadata)
+      })
+    })
+
+    it('should persist metadata database to disk and reload it on instantiation', () => {
+      return cache.set('key1', 'data', { metadata }).then(() => {
+        return cache.get('key1')
+      }).then(result => {
+        return cache.getMetadata('key1')
+      }).then(result => {
+        result.should.eql(metadata)
+
+        return new Promise((resolve, reject) => {
+          setTimeout(resolve, 1500)
+        }).then(() => {
+          let newCache = new Cache({
+            directory: {
+              enabled: true,
+              path: './cache',
+              extension: 'json'
+            },
+            redis: {
+              enabled: false,
+              host: '127.0.0.1',
+              port: 6379
+            }
+          })
+
+          return cache.getMetadata('key1')
+        }).then(result => {
+          result.should.eql(metadata)
+        })
+      })
+    })
+
+    it('should delete any metadata associated with a key when it\'s flushed', done => {
+      cache.set('key2', 'data', { metadata }).then(() => {
+        return cache.get('key2')
+      }).then(stream => {
+        should.exist(stream)
+
+        return cache.getMetadata('key2')
+      }).then(result => {
+        result.should.eql(metadata)
+
+        return cache.flush('key*')
+      }).then(() => {
+        return cache.get('key2').catch(err => {
+          err.message.should.eql(
+            'The specified key does not exist'
+          )
+
+          return cache.getMetadata('key2').then(result => {
+            should.equal(result, null)
+
+            done()
+          })
+        })
+      })
+    })
+
+    it('should not delete metadata associated with a key when another key is flushed', () => {
+      cache.set('key3', 'data', { metadata }).then(() => {
+        return cache.get('key3')
+      }).then(stream => {
+        should.exist(stream)
+
+        return cache.getMetadata('key3')
+      }).then(result => {
+        result.should.eql(metadata)
+
+        return cache.flush('key2')
+      }).then(() => {
+        return cache.get('key3')
+      }).then(result => {
+        result.should.eql(metadata)
+      })
+    })
+
+    it('should return null when trying to get metadata for a key that doesn\'t have any', () => {
+      return cache.getMetadata('key-that-does-not-exist').then(result => {
+        should.equal(result, null)
       })
     })
   })

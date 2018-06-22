@@ -126,31 +126,33 @@ describe('FileCache', function () {
       })
     })
 
-    it('should generate a cache filename from the directory and key', sinon.test(function () {
-      var spy = this.spy(fs, 'createWriteStream')
-      cache.set('key1', 'data')
+    it('should generate a cache filename from the directory and key', function (done) {
+      var spy = sinon.spy(fs, 'createWriteStream')
 
-      return spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
-    }))
+      cache.set('key1', 'data').then(() => {
+        spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
+        done()
+      })
+    })
 
     it('should create a cache file when a String is passed', function (done) {
-      cache.set('key1', 'data')
-
+      cache.set('key1', 'data').then(() => {
       // check a file exists
-      fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-        (!err).should.eql(true)
-        done()
+        fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
+          (!err).should.eql(true)
+          done()
+        })
       })
     })
 
     it('should create a cache file when a Buffer is passed', function (done) {
       var buffer = new Buffer('data')
-      cache.set('key1', buffer)
-
-      // check a file exists
-      fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-        (!err).should.eql(true)
-        done()
+      cache.set('key1', buffer).then(() => {
+        // check a file exists
+        fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
+          (!err).should.eql(true)
+          done()
+        })
       })
     })
 
@@ -158,12 +160,12 @@ describe('FileCache', function () {
       var stream = new Stream.Readable()
       stream.push('data')
       stream.push(null)
-      cache.set('key1', stream)
-
-      // check a file exists
-      fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-        (!err).should.eql(true)
-        done()
+      cache.set('key1', stream).then(() => {
+        // check a file exists
+        fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
+          (!err).should.eql(true)
+          done()
+        })
       })
     })
   })
@@ -336,40 +338,49 @@ describe('FileCache', function () {
       cleanup(path.resolve(cache.cacheHandler.directory))
     })
 
-    it('should generate a cache filename from the directory and key', sinon.test(function () {
-      var spy = this.spy(fs, 'stat')
+    it('should generate a cache filename from the directory and key', function (done) {
+      var spy = sinon.spy(fs, 'createReadStream')
 
-      cache.set('key1', 'data')
-      cache.get('key1')
+      cache.set('key1', 'data').then(() => {
+        cache.get('key1').then(() => {
+          fs.createReadStream.restore()
+          spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
+          done()
+        })
+      })
+    })
 
-      return spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
-    }))
-
-    it('should generate a cache path with subdirectories when directoryChunkSize is set', sinon.test(function () {
+    it('should generate a cache path with subdirectories when directoryChunkSize is set', function (done) {
       var cacheWithChunks = new Cache({ directory: { enabled: true, path: './cache', extension: 'json', directoryChunkSize: 4 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
-      var spy = this.spy(fs, 'stat')
+      var spy = sinon.spy(fs, 'createReadStream')
 
       var key = '1073ab6cda4b991cd29f9e83a307f34004ae9327'
       var expectedPath = path.resolve(cacheWithChunks.cacheHandler.directory + '/1073/ab6c/da4b/991c/d29f/9e83/a307/f340/04ae/9327' + '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json')
 
       cacheWithChunks.set(key, 'data')
 
-      cacheWithChunks.get(key)
-      return spy.firstCall.args[0].should.eql(expectedPath)
-    }))
+      cacheWithChunks.get(key).then(() => {
+        fs.createReadStream.restore()
+        spy.firstCall.args[0].should.eql(expectedPath)
+        done()
+      })
+    })
 
-    it('should generate a cache path with uneven-length subdirectories when directoryChunkSize is set', sinon.test(function () {
+    it('should generate a cache path with uneven-length subdirectories when directoryChunkSize is set', function (done) {
       var cacheWithChunks = new Cache({ directory: { enabled: true, path: './cache', extension: 'json', directoryChunkSize: 7 }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
-      var spy = this.spy(fs, 'stat')
+      var spy = sinon.spy(fs, 'createReadStream')
 
       var key = '1073ab6cda4b991cd29f9e83a307f34004ae9327'
       var expectedPath = path.resolve(cacheWithChunks.cacheHandler.directory + '/1073ab6/cda4b99/1cd29f9/e83a307/f34004a/e9327' + '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json')
 
       cacheWithChunks.set(key, 'data')
 
-      cacheWithChunks.get(key)
-      return spy.firstCall.args[0].should.eql(expectedPath)
-    }))
+      cacheWithChunks.get(key).then(() => {
+        fs.createReadStream.restore()
+        spy.firstCall.args[0].should.eql(expectedPath)
+        done()
+      })
+    })
 
     it('should reject if the key cannot be found', function (done) {
       cache.set('key1', 'data')

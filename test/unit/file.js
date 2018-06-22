@@ -607,8 +607,6 @@ describe('FileCache', function () {
       })
     })
 
-    it('should reject if the key has expired')
-
     it('should return a stream', function (done) {
       cache.set('key1', 'data')
       cache.get('key1').then((stream) => {
@@ -616,5 +614,29 @@ describe('FileCache', function () {
         done()
       })
     })
+
+    it('should gracefully handle the case where there is a match in the internal database for a key pointing to a path that does not exist', function (done) {
+      cache.set('key1', 'data').then(() => {
+        setTimeout(() => {
+          fs.unlinkSync(cache.cacheHandler.directory + '/key1.json')
+
+          cache.cacheHandler.db.then(db => {
+            db.find({
+              $key: 'key1'
+            }).length.should.eql(1)
+
+            cache.get('key1').catch(err => {
+              err.message.should.eql('The specified key does not exist')
+
+              db.find({
+                $key: 'key1'
+              }).length.should.eql(0)              
+
+              done()
+            })
+          })
+        }, 100)
+      })
+    })    
   })
 })

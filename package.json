@@ -38,12 +38,12 @@
   },
   "devDependencies": {
     "concat-stream": "^1.6.0",
+    "coveralls": "^3.0.1",
     "env-test": "^1.0.0",
     "fakeredis": "^1.0.3",
     "ink-docstrap": "latest",
     "ioredis-mock": "^1.7.0",
     "istanbul": "^0.4.4",
-    "istanbul-cobertura-badger": "^1.2.1",
     "length-stream": "^0.1.1",
     "mocha": "3.2.x",
     "mock-redis-client": "^0.91.13",

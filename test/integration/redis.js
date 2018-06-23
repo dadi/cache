@@ -72,7 +72,7 @@ describe('RedisCache', function () {
     })
   })
 
-  describe('Non-clustered instance (127.0.0.1:6379)', () => {
+  describe('Clustered instance (127.0.0.1:6379)', () => {
     it.skip('should connect to a redis cluster', (done) => {
       cache = Cache({
         directory: {

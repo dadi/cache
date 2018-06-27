@@ -7,9 +7,17 @@
     "docs": "jsdoc -c ./docs/docconf.json -t ./node_modules/ink-docstrap/template -R README.md -r lib -d docs",
     "test": "standard lib && env NODE_ENV=test ./node_modules/.bin/istanbul cover --report cobertura --report text --report html --report lcov ./node_modules/.bin/_mocha test",
     "posttest": "./scripts/coverage.js",
+    "precommit": "lint-staged",
     "semantic-release": "semantic-release",
     "travis-deploy-once": "travis-deploy-once"
   },
+  "lint-staged": {
+    "**/*.js": [
+      "prettier --no-semi --write",
+      "standard --fix",
+      "git add"
+    ]
+  },  
   "repository": {
     "type": "git",
     "url": "https://github.com/dadi/cache.git"
@@ -45,8 +53,10 @@
     "ioredis-mock": "^1.7.0",
     "istanbul": "^0.4.4",
     "length-stream": "^0.1.1",
+    "lint-staged": "^7.2.0",
     "mocha": "3.2.x",
     "mock-redis-client": "^0.91.13",
+    "prettier": "^1.13.6",
     "semantic-release": "^15.1.7",
     "should": "^10.0.0",
     "sinon": "^1.17.5",

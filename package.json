@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "docs": "jsdoc -c ./docs/docconf.json -t ./node_modules/ink-docstrap/template -R README.md -r lib -d docs",
+    "format": "prettier --no-semi --single-quote --write '{lib,test}/**/*.js' && standard --fix '{lib,test/**}/*.js'",
     "test": "standard lib && env NODE_ENV=test ./node_modules/.bin/istanbul cover --report cobertura --report text --report html --report lcov ./node_modules/.bin/_mocha test",
     "posttest": "./scripts/coverage.js",
     "precommit": "lint-staged",
@@ -12,12 +13,15 @@
     "travis-deploy-once": "travis-deploy-once"
   },
   "lint-staged": {
-    "**/*.js": [
-      "prettier --no-semi --write",
+    "lib/*.js": [
+      "prettier --no-semi --single-quote --write",
       "standard --fix",
       "git add"
     ]
-  },  
+  },
+  "standard": {
+    "env": [ "mocha" ]
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/dadi/cache.git"

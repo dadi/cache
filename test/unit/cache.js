@@ -1,5 +1,4 @@
-var should = require('should')
-var Cache = require(__dirname + '/../../lib/index')
+var Cache = require('./../../lib/index')
 
 describe('Cache', function () {
   it('should allow instantiating a Cache instance', function () {
@@ -12,7 +11,10 @@ describe('Cache', function () {
   // })
 
   it('should not be enabled if type == directory && enabled == false', function () {
-    var cache = new Cache({ directory: { enabled: false, path: './cache' }, redis: { enabled: false } })
+    var cache = new Cache({
+      directory: { enabled: false, path: './cache' },
+      redis: { enabled: false }
+    })
     return cache.enabled.should.eql(false)
   })
 
@@ -21,12 +23,19 @@ describe('Cache', function () {
   // })
 
   it('should be enabled if type == directory && enabled == true', function () {
-    var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false } })
+    var cache = new Cache({
+      directory: { enabled: true, path: './cache' },
+      redis: { enabled: false }
+    })
     return cache.enabled.should.eql(true)
   })
 
   it('should ignore falsy keys', function () {
-    var cache = new Cache({ expireAt: null, directory: { enabled: true, path: './cache' }, redis: { enabled: false } })
+    var cache = new Cache({
+      expireAt: null,
+      directory: { enabled: true, path: './cache' },
+      redis: { enabled: false }
+    })
     return cache.enabled.should.eql(true)
   })
 
@@ -39,17 +48,26 @@ describe('Cache', function () {
   // })
 
   it('should be enabled if type == redis && enabled == true', function () {
-    var cache = new Cache({ directory: { enabled: false }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+    var cache = new Cache({
+      directory: { enabled: false },
+      redis: { enabled: true, host: '127.0.0.1', port: 6379 }
+    })
     return cache.enabled.should.eql(true)
   })
 
   it('should create a FileCache if type == directory', function () {
-    var cache = new Cache({ directory: { enabled: true, path: './cache' }, redis: { enabled: false, host: '127.0.0.1', port: 6379 } })
+    var cache = new Cache({
+      directory: { enabled: true, path: './cache' },
+      redis: { enabled: false, host: '127.0.0.1', port: 6379 }
+    })
     return cache.cacheHandler.constructor.name.should.eql('FileCache')
   })
 
   it('should create a RedisCache if type == redis', function () {
-    var cache = new Cache({ directory: { enabled: false, path: './cache' }, redis: { enabled: true, host: '127.0.0.1', port: 6379 } })
+    var cache = new Cache({
+      directory: { enabled: false, path: './cache' },
+      redis: { enabled: true, host: '127.0.0.1', port: 6379 }
+    })
     return cache.cacheHandler.constructor.name.should.eql('RedisCache')
   })
 })

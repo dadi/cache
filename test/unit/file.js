@@ -1,6 +1,5 @@
 const Cache = require('./../../lib/index')
 const exec = require('child_process').exec
-const FileCache = require('./../../lib/file')
 const fs = require('fs')
 const fsExtra = require('fs-extra')
 const path = require('path')
@@ -58,7 +57,7 @@ describe('FileCache', function () {
     beforeEach(function (done) {
       let setup = function (dir) {
         return new Promise((resolve, reject) => {
-          exec('mkdir ' + dir, (err, y, z) => {
+          exec('mkdir ' + dir, (_, y, z) => {
             return resolve()
           })
         })
@@ -96,29 +95,35 @@ describe('FileCache', function () {
         }
       })
 
-      return cache.set('keyone', 'data').then(() => {
-        return cache.set('keytwo', 'data')
-      }).then(() => {
-        return cache.set('keythree', 'data')
-      }).then(() => {
-        return cache.flush('two')
-      }).then(() => {
-        return cache.get('keyone')
-      }).then(res => {
-        should.exist(res)
-
-        return cache.get('keytwo').catch(err => {
-          should.exist(err)
-          err.message.should.eql(
-            'The specified key does not exist'
-          )
+      return cache
+        .set('keyone', 'data')
+        .then(() => {
+          return cache.set('keytwo', 'data')
         })
-      }).then(() => {
-        return cache.get('keyone')
-      }).then(res => {
-        should.exist(res)
-      })
-    })    
+        .then(() => {
+          return cache.set('keythree', 'data')
+        })
+        .then(() => {
+          return cache.flush('two')
+        })
+        .then(() => {
+          return cache.get('keyone')
+        })
+        .then(res => {
+          should.exist(res)
+
+          return cache.get('keytwo').catch(err => {
+            should.exist(err)
+            err.message.should.eql('The specified key does not exist')
+          })
+        })
+        .then(() => {
+          return cache.get('keyone')
+        })
+        .then(res => {
+          should.exist(res)
+        })
+    })
 
     it('should use default autoFlush interval if none is specfied', function () {
       let cache = new Cache({
@@ -153,7 +158,9 @@ describe('FileCache', function () {
       })
 
       cache.cacheHandler.autoFlushInterval.should.not.be.NaN()
-      cache.cacheHandler.autoFlushInterval.should.equal(specificautoFlushInterval)
+      cache.cacheHandler.autoFlushInterval.should.equal(
+        specificautoFlushInterval
+      )
     })
 
     it('should remove an expired file when cache cleansing is enabled', function (done) {
@@ -211,18 +218,9 @@ describe('FileCache', function () {
 
       cache.set('onetwothree', 'data').then(() => {
         let firstLevel = path.resolve(
-          path.join(
-            cache.cacheHandler.directory,
-            'one'
-          )
+          path.join(cache.cacheHandler.directory, 'one')
         )
-        let filePath = path.join(
-          firstLevel,
-          'two',
-          'thr',
-          'ee',
-          'onetwothree'
-        )
+        let filePath = path.join(firstLevel, 'two', 'thr', 'ee', 'onetwothree')
 
         setTimeout(() => {
           fs.stat(filePath, (err, stats) => {
@@ -258,7 +256,9 @@ describe('FileCache', function () {
         }
       })
 
-      let filePath = path.resolve(path.join(cache.cacheHandler.directory, 'test_file'))
+      let filePath = path.resolve(
+        path.join(cache.cacheHandler.directory, 'test_file')
+      )
       fs.writeFileSync(filePath, 'testfile')
 
       setTimeout(() => {
@@ -299,7 +299,7 @@ describe('FileCache', function () {
 
     afterEach(function () {
       let files = fs.readdirSync(cache.cacheHandler.directory)
-      files.forEach((file) => {
+      files.forEach(file => {
         try {
           fs.unlinkSync(cache.cacheHandler.directory + '/' + file)
         } catch (err) {}
@@ -310,27 +310,29 @@ describe('FileCache', function () {
       let spy = sinon.spy(fs, 'createWriteStream')
 
       cache.set('key1', 'data').then(() => {
-        spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
+        spy.firstCall.args[0].should.eql(
+          path.resolve(cache.cacheHandler.directory + '/key1.json')
+        )
         done()
       })
     })
 
     it('should create a cache file when a String is passed', function (done) {
       cache.set('key1', 'data').then(() => {
-      // check a file exists
+        // check a file exists
         fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-          (!err).should.eql(true)
+          ;(!err).should.eql(true)
           done()
         })
       })
     })
 
     it('should create a cache file when a Buffer is passed', function (done) {
-      let buffer = new Buffer('data')
+      let buffer = Buffer.from('data')
       cache.set('key1', buffer).then(() => {
         // check a file exists
         fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-          (!err).should.eql(true)
+          ;(!err).should.eql(true)
           done()
         })
       })
@@ -343,7 +345,7 @@ describe('FileCache', function () {
       cache.set('key1', stream).then(() => {
         // check a file exists
         fs.stat(cache.cacheHandler.directory + '/key1.json', (err, stats) => {
-          (!err).should.eql(true)
+          ;(!err).should.eql(true)
           done()
         })
       })
@@ -377,35 +379,41 @@ describe('FileCache', function () {
     })
 
     afterEach(() => {
-      fsExtra.removeSync(
-        path.join(__dirname, './../../db.json')
-      )
+      fsExtra.removeSync(path.join(__dirname, './../../db.json'))
     })
 
     it('should save metadata alongside a String payload', () => {
-      return cache.set('key1', 'data', { metadata }).then(() => {
-        return cache.get('key1')
-      }).then(result => {
-        should.exist(result)
+      return cache
+        .set('key1', 'data', { metadata })
+        .then(() => {
+          return cache.get('key1')
+        })
+        .then(result => {
+          should.exist(result)
 
-        return cache.getMetadata('key1')
-      }).then(result => {
-        result.should.eql(metadata)
-      })
+          return cache.getMetadata('key1')
+        })
+        .then(result => {
+          result.should.eql(metadata)
+        })
     })
 
     it('should save metadata alongside a Buffer payload', () => {
-      let buffer = new Buffer('data')
+      let buffer = Buffer.from('data')
 
-      return cache.set('key1', buffer, { metadata }).then(() => {
-        return cache.get('key1')
-      }).then(result => {
-        should.exist(result)
+      return cache
+        .set('key1', buffer, { metadata })
+        .then(() => {
+          return cache.get('key1')
+        })
+        .then(result => {
+          should.exist(result)
 
-        return cache.getMetadata('key1')
-      }).then(result => {
-        result.should.eql(metadata)
-      })
+          return cache.getMetadata('key1')
+        })
+        .then(result => {
+          result.should.eql(metadata)
+        })
     })
 
     it('should save metadata alongside a Stream payload', () => {
@@ -413,91 +421,110 @@ describe('FileCache', function () {
       stream.push('data')
       stream.push(null)
 
-      return cache.set('key1', stream, { metadata }).then(() => {
-        return cache.get('key1')
-      }).then(result => {
-        return cache.getMetadata('key1')
-      }).then(result => {
-        result.should.eql(metadata)
-      })
+      return cache
+        .set('key1', stream, { metadata })
+        .then(() => {
+          return cache.get('key1')
+        })
+        .then(result => {
+          return cache.getMetadata('key1')
+        })
+        .then(result => {
+          result.should.eql(metadata)
+        })
     })
 
     it('should persist metadata database to disk and reload it on instantiation', () => {
-      return cache.set('key1', 'data', { metadata }).then(() => {
-        return cache.get('key1')
-      }).then(result => {
-        return cache.getMetadata('key1')
-      }).then(result => {
-        result.should.eql(metadata)
-
-        return new Promise((resolve, reject) => {
-          setTimeout(resolve, 1500)
-        }).then(() => {
-          let newCache = new Cache({
-            directory: {
-              enabled: true,
-              path: './cache',
-              extension: 'json'
-            },
-            redis: {
-              enabled: false,
-              host: '127.0.0.1',
-              port: 6379
-            }
-          })
-
-          return cache.getMetadata('key1')
-        }).then(result => {
-          result.should.eql(metadata)
+      return cache
+        .set('key1', 'data', { metadata })
+        .then(() => {
+          return cache.get('key1')
         })
-      })
+        .then(result => {
+          return cache.getMetadata('key1')
+        })
+        .then(result => {
+          result.should.eql(metadata)
+
+          return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1500)
+          })
+            .then(() => {
+              // let newCache = new Cache({
+              //   directory: {
+              //     enabled: true,
+              //     path: './cache',
+              //     extension: 'json'
+              //   },
+              //   redis: {
+              //     enabled: false,
+              //     host: '127.0.0.1',
+              //     port: 6379
+              //   }
+              // })
+
+              return cache.getMetadata('key1')
+            })
+            .then(result => {
+              result.should.eql(metadata)
+            })
+        })
     })
 
-    it('should delete any metadata associated with a key when it\'s flushed', done => {
-      cache.set('key2', 'data', { metadata }).then(() => {
-        return cache.get('key2')
-      }).then(stream => {
-        should.exist(stream)
+    it("should delete any metadata associated with a key when it's flushed", done => {
+      cache
+        .set('key2', 'data', { metadata })
+        .then(() => {
+          return cache.get('key2')
+        })
+        .then(stream => {
+          should.exist(stream)
 
-        return cache.getMetadata('key2')
-      }).then(result => {
-        result.should.eql(metadata)
+          return cache.getMetadata('key2')
+        })
+        .then(result => {
+          result.should.eql(metadata)
 
-        return cache.flush('key*')
-      }).then(() => {
-        return cache.get('key2').catch(err => {
-          err.message.should.eql(
-            'The specified key does not exist'
-          )
+          return cache.flush('key*')
+        })
+        .then(() => {
+          return cache.get('key2').catch(err => {
+            err.message.should.eql('The specified key does not exist')
 
-          return cache.getMetadata('key2').then(result => {
-            should.equal(result, null)
+            return cache.getMetadata('key2').then(result => {
+              should.equal(result, null)
 
-            done()
+              done()
+            })
           })
         })
-      })
     })
 
     it('should not delete metadata associated with a key when another key is flushed', () => {
-      cache.set('key3', 'data', { metadata }).then(() => {
-        return cache.get('key3')
-      }).then(stream => {
-        should.exist(stream)
+      cache
+        .set('key3', 'data', { metadata })
+        .then(() => {
+          return cache.get('key3')
+        })
+        .then(stream => {
+          should.exist(stream)
 
-        return cache.getMetadata('key3')
-      }).then(result => {
-        result.should.eql(metadata)
+          return cache.getMetadata('key3')
+        })
+        .then(result => {
+          result.should.eql(metadata)
 
-        return cache.flush('key2')
-      }).then(() => {
-        return cache.get('key3')
-      }).then(result => {
-        result.should.eql(metadata)
-      })
+          return cache.flush('key2')
+        })
+        .then(() => {
+          return cache.get('key3')
+        })
+        .then(result => {
+          result.should.eql(metadata)
+        })
     })
 
-    it('should return null when trying to get metadata for a key that doesn\'t have any', () => {
+    it("should return null when trying to get metadata for a key that doesn't have any", () => {
       return cache.getMetadata('key-that-does-not-exist').then(result => {
         should.equal(result, null)
       })
@@ -521,7 +548,7 @@ describe('FileCache', function () {
     after(function () {
       // remove cache folder contents completely, and recreate
       let cleanup = function (dir) {
-        exec('rm -r ' + dir, function (err, stdout, stderr) {
+        exec('rm -r ' + dir, function (_, stdout, stderr) {
           exec('mkdir ' + dir)
         })
       }
@@ -535,7 +562,9 @@ describe('FileCache', function () {
       cache.set('key1', 'data').then(() => {
         cache.get('key1').then(() => {
           fs.createReadStream.restore()
-          spy.firstCall.args[0].should.eql(path.resolve(cache.cacheHandler.directory + '/key1.json'))
+          spy.firstCall.args[0].should.eql(
+            path.resolve(cache.cacheHandler.directory + '/key1.json')
+          )
           done()
         })
       })
@@ -558,7 +587,11 @@ describe('FileCache', function () {
       let spy = sinon.spy(fs, 'createReadStream')
 
       let key = '1073ab6cda4b991cd29f9e83a307f34004ae9327'
-      let expectedPath = path.resolve(cacheWithChunks.cacheHandler.directory + '/1073/ab6c/da4b/991c/d29f/9e83/a307/f340/04ae/9327' + '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json')
+      let expectedPath = path.resolve(
+        cacheWithChunks.cacheHandler.directory +
+          '/1073/ab6c/da4b/991c/d29f/9e83/a307/f340/04ae/9327' +
+          '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json'
+      )
 
       cacheWithChunks.set(key, 'data')
 
@@ -586,7 +619,11 @@ describe('FileCache', function () {
       let spy = sinon.spy(fs, 'createReadStream')
 
       let key = '1073ab6cda4b991cd29f9e83a307f34004ae9327'
-      let expectedPath = path.resolve(cacheWithChunks.cacheHandler.directory + '/1073ab6/cda4b99/1cd29f9/e83a307/f34004a/e9327' + '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json')
+      let expectedPath = path.resolve(
+        cacheWithChunks.cacheHandler.directory +
+          '/1073ab6/cda4b99/1cd29f9/e83a307/f34004a/e9327' +
+          '/1073ab6cda4b991cd29f9e83a307f34004ae9327.json'
+      )
 
       cacheWithChunks.set(key, 'data')
 
@@ -599,18 +636,19 @@ describe('FileCache', function () {
 
     it('should reject if the key cannot be found', function (done) {
       cache.set('key1', 'data')
-      cache.get('key2').then((stream) => {
-
-      }).catch((err) => {
-        err.message.should.eql('The specified key does not exist')
-        done()
-      })
+      cache
+        .get('key2')
+        .then(stream => {})
+        .catch(err => {
+          err.message.should.eql('The specified key does not exist')
+          done()
+        })
     })
 
     it('should return a stream', function (done) {
       cache.set('key1', 'data')
-      cache.get('key1').then((stream) => {
-        stream.should.exist
+      cache.get('key1').then(stream => {
+        should.exist(stream)
         done()
       })
     })
@@ -630,13 +668,13 @@ describe('FileCache', function () {
 
               db.find({
                 $key: 'key1'
-              }).length.should.eql(0)              
+              }).length.should.eql(0)
 
               done()
             })
           })
         }, 100)
       })
-    })    
+    })
   })
 })

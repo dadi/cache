@@ -7,3 +7,4 @@ log
 docs/**/*
 test/cat2.png
 db.json
+.nyc_output/

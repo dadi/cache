@@ -3,6 +3,7 @@ cache:
   directories:
     - ~/.npm
 notifications:
+  slack: dadi:pnhiL60xOrm7GOglHUmb7xHK
   email: false
 node_js:
   - '8'

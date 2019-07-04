@@ -8,7 +8,9 @@
     "format": "prettier --no-semi --single-quote --write '{lib,test}/**/*.js' && standard --fix '{lib,test/**}/*.js'",
     "test": "standard lib && env NODE_ENV=test ./node_modules/.bin/nyc --reporter=lcov ./node_modules/mocha/bin/_mocha test && ./node_modules/.bin/nyc report",
     "posttest": "./scripts/coverage.js",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "lint-staged": {
     "lib/*.js": [
@@ -46,7 +48,8 @@
     "redis-wstream": "0.2.5",
     "remove-empty-directories": "0.0.1",
     "stream-to-string": "1.1.0",
-    "streamifier": "0.1.1"
+    "streamifier": "0.1.1",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "concat-stream": "^1.6.0",
@@ -66,5 +69,6 @@
     "sinon": "^1.17.5",
     "standard": "latest",
     "supertest": "^2.0.0"
-  }
+  },
+  "snyk": true
 }

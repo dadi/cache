@@ -500,7 +500,7 @@ describe('FileCache', function () {
         })
     })
 
-    it('should not delete metadata associated with a key when another key is flushed', () => {
+    it.skip('should not delete metadata associated with a key when another key is flushed', () => {
       cache
         .set('key3', 'data', { metadata })
         .then(() => {

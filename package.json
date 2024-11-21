@@ -41,7 +41,7 @@
     "mkdirp": "0.5.1",
     "node-redis-streamify": "0.1.6",
     "recursive-readdir": "2.1.1",
-    "redis": "2.6.2",
+    "redis": "3.1.1",
     "redis-rstream": "0.1.2",
     "redis-wstream": "0.2.5",
     "remove-empty-directories": "0.0.1",
